@@ -110,12 +110,14 @@ const App = () => {
         <div
           className="border w-full h-[50vh] flex justify-center items-center"
           style={{
-            backgroundImage: `url()`,
+            backgroundImage: frame
+              ? `url(data:image/jpeg;base64${frame})`
+              : "url()",
             backgroundSize: "cover",
             backgroundPosition: "center",
           }}
         >
-          {frame ? (
+          {/* {frame ? (
             <img
               src={`data:image/jpeg;base64,${frame}`}
               alt="Camera Feed"
@@ -126,7 +128,7 @@ const App = () => {
             />
           ) : (
             <div>카메라 피드 대기 중...</div>
-          )}
+          )} */}
         </div>
         {/* 버튼 및 거리 확인 */}
         <div className="flex flex-col justify-center gap-2">
