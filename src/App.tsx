@@ -60,19 +60,19 @@ const App = () => {
 
   // 초음파 센서 데이터 요청
   const requestUltrasonicData = () => {
-    socket.emit("get_ultrasonic");
+    // socket.emit("get_ultrasonic");
   };
 
   // 서보모터 제어 요청
   const moveServo = (isOpen: boolean) => {
-    socket.emit("move_servo", { isOpen });
+    // socket.emit("move_servo", { isOpen });
     setSurvoStatus(isOpen);
   };
 
-  // useEffect(() => {
-  //   requestUltrasonicData();
-  //   moveServo(true); // 초기에 열어놓기
-  // }, []);
+  useEffect(() => {
+    requestUltrasonicData();
+    moveServo(true); // 초기에 열어놓기
+  }, []);
 
   return (
     <>
