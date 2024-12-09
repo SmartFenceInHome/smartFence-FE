@@ -7,8 +7,7 @@ import { AlertCircle, Terminal } from "lucide-react";
 import { Button } from "./components/ui/button";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 
-// TODO : ip 주소 변경
-const socket = io("http://<raspberry-pi-ip>:8000");
+const socket = io("http://192.168.1.7:8080");
 
 const App = () => {
   // TODO: 초음파 센서 거리 받아오기
@@ -20,17 +19,20 @@ const App = () => {
   useEffect(() => {
     // 초음파 센서 데이터 받기
     socket.on("ultrasonic_data", (data) => {
+      console.log(data.distance);
       setDistance(data.distance);
     });
 
     // 서보모터 상태 받기
     socket.on("servo_status", (data) => {
+      console.log(data);
       setSurvoStatus(data.status);
     });
 
     // 카메라 이미지 받기 (3초마다)
     socket.on("camera_frame", (data) => {
-      setFrame(data.image);
+      console.log(data.image);
+      // setFrame(data.image);
     });
 
     // 서버 연결 해제시 cleanup
