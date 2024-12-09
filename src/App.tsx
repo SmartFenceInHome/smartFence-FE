@@ -107,17 +107,8 @@ const App = () => {
           )}
         </div>
         {/* 카메라 (가능 여부 확인 후 추가) */}
-        <div
-          className="border w-full h-[50vh] flex justify-center items-center"
-          style={{
-            backgroundImage: frame
-              ? `url(data:image/jpeg;base64${frame})`
-              : "url()",
-            backgroundSize: "cover",
-            backgroundPosition: "center",
-          }}
-        >
-          {/* {frame ? (
+        <div className="border w-full h-auto flex justify-center items-center overflow-hidden">
+          {frame ? (
             <img
               src={`data:image/jpeg;base64,${frame}`}
               alt="Camera Feed"
@@ -128,7 +119,7 @@ const App = () => {
             />
           ) : (
             <div>카메라 피드 대기 중...</div>
-          )} */}
+          )}
         </div>
         {/* 버튼 및 거리 확인 */}
         <div className="flex flex-col justify-center gap-2">
