@@ -7,7 +7,15 @@ import { AlertCircle, Terminal } from "lucide-react";
 import { Button } from "./components/ui/button";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 
-const socket = io("http://192.168.1.7:8080");
+// const socket = io("http://192.168.1.7:8080");
+const socket = io("http://192.168.1.7:8080", {
+  transports: ["websocket", "polling"], // polling도 허용
+  reconnection: true,
+  reconnectionAttempts: 5,
+  reconnectionDelay: 1000,
+  secure: false, // HTTP 연결 허용
+  rejectUnauthorized: false, // 인증서 검증 건너뛰기
+});
 
 const App = () => {
   // TODO: 초음파 센서 거리 받아오기
