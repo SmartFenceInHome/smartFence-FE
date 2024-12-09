@@ -68,10 +68,10 @@ const App = () => {
     setSurvoStatus(isOpen);
   };
 
-  useEffect(() => {
-    requestUltrasonicData();
-    moveServo(true); // 초기에 열어놓기
-  }, []);
+  // useEffect(() => {
+  //   requestUltrasonicData();
+  //   moveServo(true); // 초기에 열어놓기
+  // }, []);
 
   return (
     <>
