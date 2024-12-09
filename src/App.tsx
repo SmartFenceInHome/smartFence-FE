@@ -40,7 +40,7 @@ const App = () => {
     // 카메라 이미지 받기 (3초마다)
     socket.on("camera_frame", (data) => {
       console.log(data.image);
-      // setFrame(data.image);
+      setFrame(data.image);
     });
 
     // 서버 연결 해제시 cleanup
