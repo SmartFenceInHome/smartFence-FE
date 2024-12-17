@@ -7,54 +7,86 @@ import { AlertCircle, Terminal } from "lucide-react";
 import { Button } from "./components/ui/button";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 
-// const socket = io("http://192.168.1.7:8080");
-const socket = io("ws://192.168.1.7:8080", {
-  transports: ["websocket"],
+// const socket = io("http://192.168.1.7:8080", {
+//   transports: ["websocket", "polling"], // polling을 폴백으로 추가
+//   timeout: 20000, // 타임아웃 시간 증가
+//   forceNew: true,
+//   reconnectionDelay: 1000,
+//   reconnection: true,
+//   reconnectionAttempts: Infinity, // 재연결 시도 횟수를 늘림
+//   pingInterval: 1000, // ping 간격 조정
+//   pingTimeout: 5000, // ping 타임아웃 설정
+// });
+const socket = io("http://192.168.1.7:8080", {
+  transports: ["websocket"], // polling 제거하고 웹소켓만 사용
+  forceNew: true,
   reconnection: true,
-  reconnectionAttempts: 5,
-  reconnectionDelay: 1000,
-  secure: false,
-  rejectUnauthorized: false,
+  reconnectionAttempts: Infinity,
+  reconnectionDelay: 100, // 재연결 딜레이 최소화
+  timeout: 5000, // 타임아웃 줄이기
 });
 
 const App = () => {
+  const [isConnected, setIsConnected] = useState(false);
+  const [isOpen, setIsOpen] = useState(false); // 자동문
+  const [warning, setWarning] = useState(false); // 경고문
+
   // TODO: 초음파 센서 거리 받아오기
   const [distance, setDistance] = useState<string | null>(null);
-  const [servoStatus, setSurvoStatus] = useState<boolean>(true);
   const [frame, setFrame] = useState(null);
+
+  const [lastReceiveTime, setLastReceiveTime] = useState(Date.now());
 
   // WebSocket 연결
   useEffect(() => {
     socket.on("connect", () => {
       console.log("Connected to server");
+      setIsConnected(true);
+    });
+
+    socket.on("disconnect", () => {
+      console.log("Disconnected");
+      setIsConnected(false);
     });
 
     socket.on("connect_error", (error) => {
       console.error("Connection error:", error);
+      setIsConnected(false);
     });
 
     // 초음파 센서 데이터 받기
     socket.on("ultrasonic_data", (data) => {
-      console.log(data.distance);
+      const now = Date.now();
+      const timeDiff = now - lastReceiveTime;
+      console.log(`수신 간격: ${timeDiff}ms`);
+      console.log("데이터 수신:", data.distance, new Date().toISOString());
+
       setDistance(data.distance);
+      setLastReceiveTime(now);
     });
 
     // 서보모터 상태 받기
     socket.on("servo_status", (data) => {
       console.log(data);
-      setSurvoStatus(data.status);
+      setIsOpen(data.status);
     });
 
     // 카메라 이미지 받기 (3초마다)
     socket.on("camera_frame", (data) => {
       console.log("get image");
-      console.log(data.image);
+      // console.log(data.image);
       setFrame(data.image);
+    });
+
+    socket.on("warning", () => {
+      setWarning(true);
     });
 
     // 서버 연결 해제시 cleanup
     return () => {
-      socket.disconnect();
+      socket.off("connect");
+      socket.off("disconnect");
+      socket.off("connect_error");
     };
   }, []);
 
@@ -64,15 +96,23 @@ const App = () => {
   };
 
   // 서보모터 제어 요청
-  const moveServo = (isOpen: boolean) => {
-    // socket.emit("move_servo", { isOpen });
-    setSurvoStatus(isOpen);
+  const openDoor = () => {
+    socket.emit("move_servo", { isOpen: true });
+    setWarning(false);
   };
+  const closeDoor = () => {
+    socket.emit("move_servo", { isOpen: false });
+  };
+  // const moveServo = (isOpen: boolean) => {
+  //   socket.emit("move_servo", { isOpen });
+  //   setSurvoStatus(isOpen);
+  // };
 
   useEffect(() => {
     requestUltrasonicData();
-    moveServo(true); // 초기에 열어놓기
   }, []);
+
+  if (!isConnected) return null;
 
   return (
     <>
@@ -85,7 +125,7 @@ const App = () => {
               <AlertTitle>ㅡ</AlertTitle>
               <AlertDescription>ㅡ</AlertDescription>
             </Alert>
-          ) : Number(distance) > 50 ? (
+          ) : warning == false ? (
             <Alert variant="default">
               <Terminal className="w-4 h-4" />
               <AlertTitle>안전 모드</AlertTitle>
@@ -126,14 +166,20 @@ const App = () => {
           <Button variant="ghost" disabled>
             물체와의 거리 {distance}cm
           </Button>
-          <Button
-            variant={servoStatus ? "destructive" : "default"}
-            size="lg"
-            onClick={() => moveServo(!servoStatus)}
-            className={servoStatus ? "" : "bg-blue-500 hover:bg-blue-400"}
-          >
-            스마트 펜스 {servoStatus ? "닫기" : "열기"}
-          </Button>
+          {isOpen ? (
+            <Button variant="destructive" size="lg" onClick={() => closeDoor()}>
+              스마트 펜스 닫기
+            </Button>
+          ) : (
+            <Button
+              variant="default"
+              size="lg"
+              onClick={() => openDoor()}
+              className="bg-blue-500 hover:bg-blue-400"
+            >
+              스마트 펜스 열기
+            </Button>
+          )}
         </div>
       </div>
     </>
