@@ -62,8 +62,8 @@ const App = () => {
     socket.on("ultrasonic_data", (data) => {
       // const now = Date.now();
       // const timeDiff = now - lastReceiveTime;
-      // console.log("거리:", data.distance, new Date().toISOString());
-      // console.log("감지:", data.object_detected, new Date().toISOString());
+      console.log("거리:", data.distance, new Date().toISOString());
+      console.log("감지:", data.object_detected, new Date().toISOString());
 
       setDistance(data.distance);
       setDetection(data.object_detected);
@@ -104,11 +104,13 @@ const App = () => {
   // 서보모터 제어 요청
   const openDoor = () => {
     if (isOpen) return;
+    console.log("열림 요청");
     socket.emit("move_servo", { isOpen: true });
     // setWarning(false);
   };
   const closeDoor = () => {
     if (!isOpen) return;
+    console.log("닫힘 요청");
     socket.emit("move_servo", { isOpen: false });
   };
   // const moveServo = (isOpen: boolean) => {
