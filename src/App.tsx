@@ -29,13 +29,13 @@ const socket = io("http://192.168.1.7:8080", {
 const App = () => {
   const [isConnected, setIsConnected] = useState(false);
   const [isOpen, setIsOpen] = useState(false); // 자동문
-  const [warning, setWarning] = useState(false); // 경고문
+  // const [warning, setWarning] = useState(false); // 경고문
 
-  // TODO: 초음파 센서 거리 받아오기
-  const [distance, setDistance] = useState<string | null>(null);
+  const [distance, setDistance] = useState<number>(0);
+  const [detection, setDetection] = useState<boolean>(false);
   const [frame, setFrame] = useState(null);
 
-  const [lastReceiveTime, setLastReceiveTime] = useState(Date.now());
+  // const [lastReceiveTime, setLastReceiveTime] = useState(Date.now());
 
   // WebSocket 연결
   useEffect(() => {
@@ -56,13 +56,14 @@ const App = () => {
 
     // 초음파 센서 데이터 받기
     socket.on("ultrasonic_data", (data) => {
-      const now = Date.now();
-      const timeDiff = now - lastReceiveTime;
-      console.log(`수신 간격: ${timeDiff}ms`);
-      console.log("데이터 수신:", data.distance, new Date().toISOString());
+      // const now = Date.now();
+      // const timeDiff = now - lastReceiveTime;
+      console.log("거리:", data.distance, new Date().toISOString());
+      console.log("감지:", data.object_detected, new Date().toISOString());
 
       setDistance(data.distance);
-      setLastReceiveTime(now);
+      setDetection(data.object_detected);
+      // setLastReceiveTime(now);
     });
 
     // 서보모터 상태 받기
@@ -78,9 +79,10 @@ const App = () => {
       setFrame(data.image);
     });
 
-    socket.on("warning", () => {
-      setWarning(true);
-    });
+    // socket.on("warning", () => {
+    //   console.log("warning");
+    //   setWarning(true);
+    // });
 
     // 서버 연결 해제시 cleanup
     return () => {
@@ -98,7 +100,7 @@ const App = () => {
   // 서보모터 제어 요청
   const openDoor = () => {
     socket.emit("move_servo", { isOpen: true });
-    setWarning(false);
+    // setWarning(false);
   };
   const closeDoor = () => {
     socket.emit("move_servo", { isOpen: false });
@@ -119,29 +121,30 @@ const App = () => {
       <div className="bg-white flex flex-col justify-between gap-4">
         {/* 알림 */}
         <div className="w-full">
-          {!distance ? (
+          {!distance || !detection ? (
             <Alert variant="default">
               <Terminal className="w-4 h-4" />
               <AlertTitle>ㅡ</AlertTitle>
               <AlertDescription>ㅡ</AlertDescription>
             </Alert>
-          ) : warning == false ? (
-            <Alert variant="default">
-              <Terminal className="w-4 h-4" />
-              <AlertTitle>안전 모드</AlertTitle>
-              <AlertDescription>
-                물체와의 거리가{" "}
-                <span className="text-blue-500 font-bold">{distance} cm</span>{" "}
-                로 충분히 안전하여 스마트 펜스를 열어둡니다.
-              </AlertDescription>
-            </Alert>
-          ) : (
+          ) : distance < 50 && detection ? (
             <Alert variant="destructive">
               <AlertCircle className="w-4 h-4" />
               <AlertTitle>물체 근접!</AlertTitle>
               <AlertDescription>
                 물체와의 거리가 <span className="font-bold">{distance} cm</span>{" "}
                 로 매우 가까워 스마트 펜스를 닫습니다.
+              </AlertDescription>
+            </Alert>
+          ) : (
+            <Alert variant="default">
+              <Terminal className="w-4 h-4" />
+              <AlertTitle>안전 모드</AlertTitle>
+              <AlertDescription>
+                <span>물체와의 거리</span>
+                <span className="text-blue-500 font-bold">{distance} cm</span>
+                <span>물체 탐지</span>
+                <span className="text-blue-500 font-bold">{detection} cm</span>
               </AlertDescription>
             </Alert>
           )}
