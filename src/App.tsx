@@ -28,7 +28,7 @@ const socket = io("http://192.168.1.7:8080", {
 
 const App = () => {
   const [isConnected, setIsConnected] = useState(false);
-  const [isOpen, setIsOpen] = useState(false); // 자동문
+  const [isOpen, setIsOpen] = useState(true); // 자동문
   // const [warning, setWarning] = useState(false); // 경고문
 
   const [distance, setDistance] = useState<number>(0);
