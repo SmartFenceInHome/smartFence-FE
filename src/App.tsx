@@ -175,7 +175,7 @@ const App = () => {
           <Button variant="ghost" disabled>
             물체와의 거리 {distance}cm
           </Button>
-          {isOpen ? (
+          {isOpen === true ? (
             <Button variant="destructive" size="lg" onClick={() => closeDoor()}>
               스마트 펜스 닫기
             </Button>
