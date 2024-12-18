@@ -121,7 +121,7 @@ const App = () => {
       <div className="bg-white flex flex-col justify-between gap-4">
         {/* 알림 */}
         <div className="w-full">
-          {!distance || !detection ? (
+          {!distance ? (
             <Alert variant="default">
               <Terminal className="w-4 h-4" />
               <AlertTitle>ㅡ</AlertTitle>
@@ -140,11 +140,17 @@ const App = () => {
             <Alert variant="default">
               <Terminal className="w-4 h-4" />
               <AlertTitle>안전 모드</AlertTitle>
-              <AlertDescription>
-                <span>물체와의 거리</span>
-                <span className="text-blue-500 font-bold">{distance} cm</span>
-                <span>물체 탐지</span>
-                <span className="text-blue-500 font-bold">{detection} cm</span>
+              <AlertDescription className="flex flex-col">
+                <div className="flex gap-1">
+                  <span>물체와의 거리</span>
+                  <span className="text-blue-500 font-bold">{distance} cm</span>
+                </div>
+                <div className="flex gap-1">
+                  <span>물체 탐지</span>
+                  <span className="text-blue-500 font-bold">
+                    {detection ? "O" : "X"}
+                  </span>
+                </div>
               </AlertDescription>
             </Alert>
           )}
