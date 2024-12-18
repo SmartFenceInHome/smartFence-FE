@@ -18,7 +18,7 @@ import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 //   pingTimeout: 5000, // ping 타임아웃 설정
 // });
 const socket = io("http://192.168.1.7:8080", {
-  transports: ["websocket"], // polling 제거하고 웹소켓만 사용
+  transports: ["websocket", "polling"],
   forceNew: true,
   reconnection: true,
   reconnectionAttempts: Infinity,
@@ -30,6 +30,10 @@ const App = () => {
   const [isConnected, setIsConnected] = useState(false);
   const [isOpen, setIsOpen] = useState(true); // 자동문
   // const [warning, setWarning] = useState(false); // 경고문
+
+  useEffect(() => {
+    console.log("문 상태 : ", isOpen);
+  }, [isOpen]);
 
   const [distance, setDistance] = useState<number>(0);
   const [detection, setDetection] = useState<boolean>(false);
@@ -58,8 +62,8 @@ const App = () => {
     socket.on("ultrasonic_data", (data) => {
       // const now = Date.now();
       // const timeDiff = now - lastReceiveTime;
-      console.log("거리:", data.distance, new Date().toISOString());
-      console.log("감지:", data.object_detected, new Date().toISOString());
+      // console.log("거리:", data.distance, new Date().toISOString());
+      // console.log("감지:", data.object_detected, new Date().toISOString());
 
       setDistance(data.distance);
       setDetection(data.object_detected);
@@ -74,7 +78,7 @@ const App = () => {
 
     // 카메라 이미지 받기 (3초마다)
     socket.on("camera_frame", (data) => {
-      console.log("get image");
+      // console.log("get image");
       // console.log(data.image);
       setFrame(data.image);
     });
@@ -99,10 +103,12 @@ const App = () => {
 
   // 서보모터 제어 요청
   const openDoor = () => {
+    if (isOpen) return;
     socket.emit("move_servo", { isOpen: true });
     // setWarning(false);
   };
   const closeDoor = () => {
+    if (!isOpen) return;
     socket.emit("move_servo", { isOpen: false });
   };
   // const moveServo = (isOpen: boolean) => {
